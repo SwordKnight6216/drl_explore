@@ -1,8 +1,11 @@
-import tensorflow as tf
-import numpy as np
-from collections import deque
 import random
+from collections import deque
 from datetime import datetime
+
+import numpy as np
+import tensorflow as tf
+
+
 class DQN:
     def __init__(self, state_size, action_size, learning_rate=0.001, discount_factor=0.9, exploration_rate=1.0,
                  exploration_decay=0.995, batch_size=64, memory_size=2000):
@@ -66,7 +69,7 @@ class DQN:
             # Explore: Choose a random action
             return random.randrange(self.action_size)
 
-        # Exploit: Choose the action with highest predicted Q-value
+        # Exploit: Choose the action with the highest predicted Q-value
         q_values = self.model.predict(state)
         return np.argmax(q_values[0])
 
@@ -104,4 +107,3 @@ class DQN:
         with self.summary_writer.as_default():
             tf.summary.scalar('Loss', np.mean(np.abs(q_values - self.model.predict(states))), step=episode)
             tf.summary.scalar('Exploration Rate', self.exploration_rate, step=episode)
-
