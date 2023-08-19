@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from collections import deque
 import random
+from datetime import datetime
 class DQN:
     def __init__(self, state_size, action_size, learning_rate=0.001, discount_factor=0.9, exploration_rate=1.0,
                  exploration_decay=0.995, batch_size=64, memory_size=2000):
@@ -27,6 +28,11 @@ class DQN:
         # Experience replay buffer to store experiences and batch size for training
         self.memory = deque(maxlen=memory_size)
         self.batch_size = batch_size
+
+        # TensorBoard logging setup
+        current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.log_dir = 'logs/dqn/' + current_time
+        self.summary_writer = tf.summary.create_file_writer(self.log_dir)
 
     def _build_model(self, learning_rate):
         # Define a feedforward neural network
@@ -64,7 +70,7 @@ class DQN:
         q_values = self.model.predict(state)
         return np.argmax(q_values[0])
 
-    def learn(self):
+    def learn(self, episode):
         # Ensure there are enough samples in memory to form a batch
         if len(self.memory) < self.batch_size:
             return
@@ -93,3 +99,9 @@ class DQN:
         # Decay the exploration rate to gradually shift from exploration to exploitation
         if self.exploration_rate > self.exploration_min:
             self.exploration_rate *= self.exploration_decay
+
+        # Log the loss for TensorBoard
+        with self.summary_writer.as_default():
+            tf.summary.scalar('Loss', np.mean(np.abs(q_values - self.model.predict(states))), step=episode)
+            tf.summary.scalar('Exploration Rate', self.exploration_rate, step=episode)
+

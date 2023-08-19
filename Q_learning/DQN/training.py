@@ -9,8 +9,6 @@ state_size = 1  # Price is the only state
 action_size = 3  # Three possible actions: increase, keep, or decrease the price
 dqn_agent = DQN(state_size, action_size)
 
-# ... [rest of the script remains unchanged]
-
 # Simulate interactions with the environment to train the DQN
 EPISODES = 100
 for episode in range(EPISODES):
@@ -23,7 +21,7 @@ for episode in range(EPISODES):
         next_state = np.reshape(next_state, [1, state_size])
         dqn_agent.remember(state, action, reward, next_state, done)
         state = next_state
-        dqn_agent.learn()
+        dqn_agent.learn(episode)
     if episode % 10 == 0:
         print(f"Episode {episode}, Price: {env.current_price:.2f}")
 
