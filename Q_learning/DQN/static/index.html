@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Reinforcement Learning API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f3f4f6;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            margin: 10px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #0073e6;
+            padding-bottom: 10px;
+        }
+
+        progress[value] {
+            appearance: none;
+            width: 100%;
+            height: 30px;
+            border: none;
+            margin: 20px 0;
+        }
+
+        progress[value]::-webkit-progress-bar {
+            background-color: #eee;
+            border-radius: 2px;
+        }
+
+        progress[value]::-webkit-progress-value {
+            background-color: #0073e6;
+            border-radius: 2px;
+        }
+
+        progress[value]::-moz-progress-bar {
+            background-color: #0073e6;
+            border-radius: 2px;
+        }
+
+        .progress-container {
+            position: relative;
+        }
+
+        .progress-label {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Deep Reinforcement Learning API</h1>
+
+    <div class="container">
+        <div class="box">
+            <h2>Inference</h2>
+            <input type="text" id="inputData" placeholder="Enter input data (comma-separated)">
+            <button onclick="getPrediction()">Suggest the best action</button>
+            <h3>Output:</h3>
+            <p id="outputData">-</p>
+        </div>
+
+        <div class="box">
+            <h2>Training</h2>
+            <button onclick="startTraining()">Start Training</button>
+            <div class="progress-container">
+                <progress id="trainingProgress" max="100" value="0"></progress>
+                <span class="progress-label" id="progressLabel">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function getPrediction() {
+            let inputElement = document.getElementById('inputData');
+            let inputData = inputElement.value.split(',').map(x => parseFloat(x));
+            let response = await fetch('/predict/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: inputData })
+            });
+            let result = await response.json();
+            document.getElementById('outputData').innerText = result.prediction;
+        }
+
+        async function startTraining() {
+            let progressBar = document.getElementById('trainingProgress');
+            let progressLabel = document.getElementById('progressLabel');
+            progressBar.value = 0;
+            progressLabel.innerText = '0%';
+
+            let interval = setInterval(() => {
+                progressBar.value += 10;
+                progressLabel.innerText = progressBar.value + '%';
+                if (progressBar.value >= 100) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+
+            let response = await fetch('/start-training/', { method: 'GET' });
+            let result = await response.json();
+
+            progressBar.value = 100;
+            progressLabel.innerText = '100%';
+        }
+    </script>
+</body>
+
+</html>
